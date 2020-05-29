@@ -9,6 +9,23 @@ Imam Fadhila
 Pervasif 2020
 ```
 
+## Table of Content
+- [MAODV - Power and Delay-aware Multi-path Routing Protocol](#maodv---power-and-delay-aware-multi-path-routing-protocol)
+  - [Table of Content](#table-of-content)
+  - [1. Konsep](#1-konsep)
+    - [1.1 Deskripsi Paper](#11-deskripsi-paper)
+    - [1.2 Latar Belakang](#12-latar-belakang)
+    - [1.3 Dasar Teori](#13-dasar-teori)
+      - [1.3.1 AODV Routing Protocol](#131-aodv-routing-protocol)
+      - [1.3.2 SPR Routing Protocol](#132-spr-routing-protocol)
+    - [1.4 Routing Protokol yang Diusulkan](#14-routing-protokol-yang-diusulkan)
+      - [1.4.1 PDMRP Routing Protocol](#141-pdmrp-routing-protocol)
+  - [2. Implementasi](#2-implementasi)
+    - [2.1 Deskripsi Sistem](#21-deskripsi-sistem)
+    - [2.2 Modifikasi](#22-modifikasi)
+  - [3. Testing](#3-testing)
+  - [4. Referensi](#4-referensi)
+
 ## 1. Konsep
 ### 1.1 Deskripsi Paper
 
@@ -97,3 +114,40 @@ Oleh karena itu, paper ini mengusulkan sebuah routing protocol baru bernama **PD
 * Kekurangan SPR :
   1. Tidak mempertimbangkan faktor **jumlah hop yang dilewati**. Sehingga SPR memiliki delay yang besar karena lebih memilih rute dengan nilai ML paling besar walaupun memiliki banyak hop, padahal perbedaan nilai ML-nya hanya sedikit dengan rute yang jauh lebih pendek.
   2. Jika ada kerusakan pada rute, maka perlu inisialisasi route discovery lagi, sehingga memakan banyak bandwith.
+  
+### 1.4 Routing Protokol yang Diusulkan
+Untuk memperbaiki kekurangan dari protokol SPR di atas, paper ini mengusulkan sebuah routing protocol baru bernama **Power and Delay-aware Multi-path Routing Protocol (PDMRP)**.
+
+#### 1.4.1 PDMRP Routing Protocol
+* Tujuan dari PDMRP adalah :
+  * Memilih **jalur paling pendek** (memiliki **jumlah hop minimum**) dan **paling stabil** (memiliki **sisa energi baterai tertinggi**) untuk dijadikan rute utama
+  * Memilih **jalur alternatif** yang dapat digunakan sebagai rute sekunder, tersier, dsb (multi-path). Sehingga ketika rute utama sudah tidak dapat digunakan lagi (rusak) maka pengiriman data langsung diarahkan ke rute sekunder tanpa harus melakukan route discovery kembali
+
+* Untuk mencapai tujuan tersebut, maka perlu dihitung Cost (C) untuk setiap jalur dengan rumus berikut :
+  
+  ```
+  C = ML / NH
+  ```
+  Keterangan:
+  * **ML** : Sisa energi baterai minimum node pada rute
+  * **NH** : Jumlah hop yang harus dilewati dalam suatu rute
+  
+* Cara kerja PDMRP :
+  1. Ketika **node intermediate** menerima paket RREQ lebih dari satu dari sumber yang sama, maka ia akan menghitung dan membandingkan C pada setiap RREQ. Kemudian ia meneruskan broadcast paket dengan nilai C paling besar, sedangkan paket lain di-drop.
+  2. Setelah menerima paket RREQ pertama, **node tujuan** akan menunggu paket RREQ lain dari jalur yang berbeda dengan waktu yang telah ditentukan. Kemudian, node tujuan membalas semua RREQ dengan mengirimkan paket RREP sesuai dengan RREQ-nya ke node asal.
+  3. **Node asal** akan menerima paket RREP dari semua jalur dan membandingkan nilai C pada semua RREP. Kemudian ia memilih rute utama dengan nilai C paling besar. Rute selanjutnya dijadikan rute sekunder, tersier, dst. 
+
+## 2. Implementasi
+### 2.1 Deskripsi Sistem
+Implementasi routing protocol MAODV - PDMRP dilakukan pada sistem dengan
+* Sistem Operasi : Linux Mint 18.3 Sylvia
+* Aplikasi yang digunakan :
+  * NS-2.35 ([Instalasi](/install-ns2.md))
+  * Netbeans for C/C++ Development ([Instalasi](https://websiteforstudents.com/how-to-install-netbeans-on-ubuntu-16-04-17-10-18-04/))
+  
+## 3. Testing
+* [Skenario Testing](testing.md)
+
+## 4. Referensi
+* [A Tutorial on the Implementation of Ad-hoc On Demand Distance Vector (AODV) Protocol in Network Simulator (NS-2)](https://drive.google.com/file/d/0B6aQ8IUEyp5NekhLZWVwV0lRNU0/edit)
+* [Ad hoc On-Demand Distance Vector (AODV) Routing](https://www.ietf.org/rfc/rfc3561.txt)
